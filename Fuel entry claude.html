@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⛽ MMRoadways Fuel Entry</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+:root{
+  --bg:#f0f4f8;--bg2:#e8edf3;--card:#ffffff;--border:#dde3ec;--border2:#c8d0de;
+  --accent:#e67e22;--accd:#cf6d17;--accl:#fef3e2;
+  --green:#16a085;--greenl:#e8f8f5;
+  --blue:#2980b9;--bluel:#eaf4fb;
+  --purple:#8e44ad;--purplel:#f5eef8;
+  --red:#c0392b;--redl:#fdedec;
+  --text:#2c3e50;--text2:#5d6d7e;--text3:#95a5a6;
+  --shadow:0 2px 16px rgba(44,62,80,0.09);--shadow2:0 4px 24px rgba(44,62,80,0.13);
+  --r:14px;--r2:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);min-height:100vh;}
+
+/* HEADER */
+.app-header{background:linear-gradient(135deg,#ffffff 0%,#fff8f0 100%);border-bottom:2px solid var(--accent);padding:14px 28px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 20px rgba(230,126,34,0.12);position:sticky;top:0;z-index:200;}
+.fuel-icon{width:50px;height:50px;background:linear-gradient(135deg,#e67e22,#cf6d17);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 16px rgba(230,126,34,0.35);}
+.app-header h1{font-family:'Rajdhani',sans-serif;font-size:1.7rem;font-weight:700;color:var(--accent);letter-spacing:1.5px;}
+.app-header .sub{font-size:0.72rem;color:var(--text3);letter-spacing:2px;text-transform:uppercase;}
+.record-badge{margin-left:auto;background:var(--accl);border:1.5px solid var(--accent);border-radius:20px;padding:5px 16px;font-size:0.8rem;color:var(--accent);font-weight:700;white-space:nowrap;}
+
+/* TABS */
+.nav-tabs-custom{display:flex;gap:4px;background:var(--card);border-radius:12px;padding:5px;box-shadow:var(--shadow);margin-bottom:20px;overflow-x:auto;}
+.nav-tab-btn{flex:1;min-width:110px;background:transparent;border:none;border-radius:9px;padding:10px 16px;font-family:'Nunito',sans-serif;font-size:0.84rem;font-weight:700;color:var(--text2);cursor:pointer;transition:all 0.25s;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;}
+.nav-tab-btn.active{background:linear-gradient(135deg,var(--accent),var(--accd));color:#fff;box-shadow:0 3px 12px rgba(230,126,34,0.3);}
+.nav-tab-btn:hover:not(.active){background:var(--bg2);color:var(--text);}
+.tab-pane-custom{display:none;}
+.tab-pane-custom.active{display:block;}
+
+/* MAIN */
+.main-container{max-width:1280px;margin:0 auto;padding:22px 16px;}
+
+/* CARDS */
+.card-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:20px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.card-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#f39c12);}
+.section-title{font-family:'Rajdhani',sans-serif;font-size:0.95rem;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:20px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:18px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow2);}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;}
+.stat-card.s1::after{background:linear-gradient(90deg,var(--accent),#f39c12);}
+.stat-card.s2::after{background:linear-gradient(90deg,var(--green),#1abc9c);}
+.stat-card.s3::after{background:linear-gradient(90deg,var(--blue),#3498db);}
+.stat-card.s4::after{background:linear-gradient(90deg,var(--purple),#9b59b6);}
+.stat-icon{font-size:1.4rem;margin-bottom:8px;}
+.stat-label{font-size:0.67rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;}
+.stat-value{font-family:'Rajdhani',sans-serif;font-size:1.75rem;font-weight:700;line-height:1;}
+.stat-card.s1 .stat-value{color:var(--accent);}
+.stat-card.s2 .stat-value{color:var(--green);}
+.stat-card.s3 .stat-value{color:var(--blue);}
+.stat-card.s4 .stat-value{color:var(--purple);}
+
+/* FORM */
+.form-label{color:var(--text2);font-size:0.72rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;display:block;}
+.form-control,.form-select{background:#fff!important;border:1.5px solid var(--border2)!important;border-radius:var(--r2)!important;color:var(--text)!important;font-family:'Nunito',sans-serif!important;font-size:0.92rem!important;padding:11px 14px!important;transition:all 0.25s!important;}
+.form-control:focus,.form-select:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(230,126,34,0.12)!important;outline:none!important;}
+.form-control::placeholder{color:var(--text3)!important;}
+
+/* VEHICLE SEARCH */
+.vehicle-search-wrapper{position:relative;}
+.vsearch{background:#fff;border:1.5px solid var(--border2);border-radius:var(--r2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.92rem;padding:11px 14px 11px 40px;width:100%;transition:all 0.25s;}
+.vsearch:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(230,126,34,0.12);outline:none;}
+.vsearch-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.82rem;pointer-events:none;}
+.vdropdown{position:absolute;top:calc(100% + 5px);left:0;right:0;background:#fff;border:1.5px solid var(--accent);border-radius:var(--r2);max-height:230px;overflow-y:auto;z-index:300;display:none;box-shadow:0 8px 30px rgba(44,62,80,0.15);}
+.vdropdown.show{display:block;}
+.voption{padding:9px 14px;cursor:pointer;font-size:0.88rem;color:var(--text);border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:8px;transition:background 0.15s;}
+.voption:hover,.voption.vactive{background:var(--accl);color:var(--accent);}
+.plate-badge{background:var(--accl);border:1px solid rgba(230,126,34,0.3);border-radius:6px;padding:2px 8px;font-size:0.78rem;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:0.5px;color:var(--accent);}
+.vselected{display:flex;align-items:center;gap:10px;background:var(--accl);border:1.5px solid var(--accent);border-radius:var(--r2);padding:10px 14px;cursor:pointer;font-size:0.9rem;margin-top:6px;}
+.vselected .plate{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;color:var(--accent);letter-spacing:0.5px;}
+
+/* AMOUNT */
+.amount-display{background:linear-gradient(135deg,#fff8f0,#fff3e0);border:2px solid var(--accent);border-radius:var(--r2);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;}
+.amt-label{color:var(--text3);font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+.amt-sub{font-size:0.65rem;color:var(--text3);}
+.amt-val{font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;color:var(--accent);line-height:1;}
+.amt-cur{font-size:0.9rem;color:var(--accent);font-weight:700;}
+
+/* BUTTONS */
+.btn-primary-custom{background:linear-gradient(135deg,var(--accent),var(--accd));border:none;border-radius:var(--r2);color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;letter-spacing:1px;padding:12px 22px;transition:all 0.25s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 3px 14px rgba(230,126,34,0.3);cursor:pointer;}
+.btn-primary-custom:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(230,126,34,0.4);color:#fff;}
+.btn-outline-custom{background:#fff;border:1.5px solid var(--border2);border-radius:var(--r2);color:var(--text2);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;letter-spacing:1px;padding:12px 22px;transition:all 0.25s;display:inline-flex;align-items:center;gap:8px;cursor:pointer;}
+.btn-outline-custom:hover{border-color:var(--accent);color:var(--accent);background:var(--accl);}
+.btn-green{background:linear-gradient(135deg,var(--green),#1abc9c);border:none;border-radius:var(--r2);color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:1px;padding:10px 18px;transition:all 0.25s;display:inline-flex;align-items:center;gap:7px;box-shadow:0 3px 12px rgba(22,160,133,0.25);cursor:pointer;}
+.btn-green:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(22,160,133,0.4);color:#fff;}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#3498db);border:none;border-radius:var(--r2);color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:1px;padding:10px 18px;transition:all 0.25s;display:inline-flex;align-items:center;gap:7px;box-shadow:0 3px 12px rgba(41,128,185,0.25);cursor:pointer;}
+.btn-blue:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(41,128,185,0.4);color:#fff;}
+.btn-purple{background:linear-gradient(135deg,var(--purple),#9b59b6);border:none;border-radius:var(--r2);color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:1px;padding:10px 18px;transition:all 0.25s;display:inline-flex;align-items:center;gap:7px;box-shadow:0 3px 12px rgba(142,68,173,0.25);cursor:pointer;}
+.btn-purple:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(142,68,173,0.4);color:#fff;}
+.btn-sm-del{background:#fff;border:1.5px solid rgba(192,57,43,0.25);border-radius:8px;padding:5px 10px;font-size:0.76rem;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:4px;color:var(--red);font-weight:700;}
+.btn-sm-del:hover{background:var(--redl);border-color:var(--red);}
+
+/* TABLE */
+.table-wrap{border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border);}
+.table-top{background:#fff;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+.table-top h3{font-family:'Rajdhani',sans-serif;font-size:1.02rem;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin:0;}
+table{width:100%;border-collapse:collapse;background:#fff;}
+thead th{background:linear-gradient(135deg,#fff8f0,#fef0d8);color:var(--accd);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.74rem;letter-spacing:1.5px;text-transform:uppercase;padding:13px 13px;text-align:left;border-bottom:2px solid rgba(230,126,34,0.2);}
+tbody tr{border-bottom:1px solid #f0f4f8;transition:background 0.15s;}
+tbody tr:hover{background:#fffbf5;}
+tbody tr:nth-child(even){background:#fafcff;}
+tbody tr:nth-child(even):hover{background:#fff8f0;}
+tbody td{padding:11px 13px;font-size:0.85rem;color:var(--text);vertical-align:middle;}
+tfoot td{padding:12px 13px;font-size:0.9rem;font-weight:700;}
+.sno-badge{background:var(--accl);border:1px solid rgba(230,126,34,0.25);border-radius:7px;padding:3px 9px;font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--accent);font-size:0.82rem;}
+.station-badge{border-radius:20px;padding:3px 11px;font-size:0.72rem;font-weight:700;letter-spacing:0.3px;white-space:nowrap;}
+.sb-0{background:#fef3e2;color:#d35400;border:1px solid #f0a500;}
+.sb-1{background:#eaf4fb;color:#1a5276;border:1px solid #5dade2;}
+.sb-2{background:#e8f8f5;color:#0e6655;border:1px solid #48c9b0;}
+.sb-3{background:#f5eef8;color:#6c3483;border:1px solid #af7ac5;}
+.sb-4{background:#fdfefe;color:#7f8c8d;border:1px solid #bfc9ca;}
+.sb-5{background:#fdedec;color:#922b21;border:1px solid #f1948a;}
+.sb-custom{background:#eaf4fb;color:#154360;border:1px solid #85c1e9;}
+.amount-cell{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.97rem;color:var(--green);}
+.plate-cell{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.87rem;color:var(--text);letter-spacing:0.5px;}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3);}
+.empty-state .ei{font-size:2.8rem;margin-bottom:12px;opacity:0.4;}
+
+/* REPORT */
+.report-filter-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:18px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.report-filter-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),#3498db);}
+.station-filter-btn{background:#fff;border:1.5px solid var(--border2);border-radius:8px;padding:7px 13px;font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s;color:var(--text2);}
+.station-filter-btn:hover,.station-filter-btn.active{background:var(--accl);border-color:var(--accent);color:var(--accent);}
+.station-filter-btn.all.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.report-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px;}
+.rs-card{background:#fff;border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;box-shadow:0 1px 8px rgba(44,62,80,0.07);}
+.rs-label{font-size:0.67rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;}
+.rs-value{font-family:'Rajdhani',sans-serif;font-size:1.5rem;font-weight:700;}
+
+/* VEHICLES TAB */
+.vcard{background:#fff;border:1px solid var(--border);border-radius:9px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;box-shadow:0 1px 6px rgba(44,62,80,0.06);}
+
+/* TOAST */
+.toast-container{position:fixed;top:80px;right:16px;z-index:9999;}
+.toast-msg{background:#fff;border-radius:12px;padding:12px 18px;font-size:0.86rem;font-weight:700;display:flex;align-items:center;gap:10px;box-shadow:0 6px 24px rgba(44,62,80,0.15);animation:slideIn 0.3s ease,fadeOut 0.3s ease 2.4s forwards;margin-bottom:8px;border-left:4px solid var(--green);color:var(--text);}
+.toast-msg.err{border-left-color:var(--red);}
+@keyframes slideIn{from{transform:translateX(110%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+@keyframes fadeOut{to{opacity:0;transform:translateX(110%);}}
+
+/* Modal */
+.modal-content{background:#fff!important;border:1px solid var(--border)!important;border-radius:var(--r)!important;}
+.modal-header{background:linear-gradient(135deg,#fff8f0,#fef0d8);border-bottom:1px solid var(--border)!important;border-radius:var(--r) var(--r) 0 0!important;padding:18px 22px!important;}
+.modal-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.15rem;color:var(--accent);letter-spacing:1.5px;}
+
+#captureArea{position:fixed;top:0;left:0;opacity:0;pointer-events:none;z-index:-999;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+
+/* FOOTER */
+.app-footer{background:linear-gradient(135deg,#ffffff,#fff8f0);border-top:2px solid var(--border);padding:16px 28px;text-align:center;margin-top:10px;}
+.app-footer .footer-text{font-size:0.78rem;color:var(--text3);letter-spacing:1px;}
+.app-footer .footer-name{color:var(--accent);font-weight:700;font-family:'Rajdhani',sans-serif;font-size:0.9rem;letter-spacing:1.5px;}
+.app-footer .footer-brand{color:var(--text2);font-weight:700;font-family:'Rajdhani',sans-serif;font-size:0.85rem;letter-spacing:1px;}
+
+@media(max-width:768px){
+  .app-header h1{font-size:1.2rem;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  table{font-size:0.78rem;}
+  thead th,tbody td,tfoot td{padding:9px 9px;}
+  .btn-primary-custom,.btn-outline-custom{font-size:0.85rem;padding:10px 14px;}
+  .nav-tab-btn{font-size:0.78rem;padding:9px 12px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="fuel-icon">⛽</div>
+  <div>
+    <h1>MMRoadways Fuel Entry</h1>
+    <div class="sub">Fleet Fuel Management System</div>
+  </div>
+  <div class="record-badge" id="recordCount">0 Records</div>
+</div>
+
+<div class="main-container">
+
+  <!-- TABS -->
+  <div class="nav-tabs-custom">
+    <button class="nav-tab-btn active" onclick="showTab('entry',this)"><i class="fas fa-plus-circle"></i> Fuel Entry</button>
+    <button class="nav-tab-btn" onclick="showTab('records',this)"><i class="fas fa-list-alt"></i> Records</button>
+    <button class="nav-tab-btn" onclick="showTab('report',this)"><i class="fas fa-chart-bar"></i> Report</button>
+    <button class="nav-tab-btn" onclick="showTab('vehicles',this)"><i class="fas fa-car"></i> Vehicles</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card s1"><div class="stat-icon">📋</div><div class="stat-label">Total Entries</div><div class="stat-value" id="stat-entries">0</div></div>
+    <div class="stat-card s2"><div class="stat-icon">₹</div><div class="stat-label">Total Amount</div><div class="stat-value" id="stat-amount">0</div></div>
+    <div class="stat-card s3"><div class="stat-icon">🛢️</div><div class="stat-label">Total Litres</div><div class="stat-value" id="stat-litres">0</div></div>
+    <div class="stat-card s4"><div class="stat-icon">⛽</div><div class="stat-label">Stations Used</div><div class="stat-value" id="stat-stations">0</div></div>
+  </div>
+
+  <!-- ===== TAB: ENTRY ===== -->
+  <div class="tab-pane-custom active" id="tab-entry">
+    <div class="card-box">
+      <div class="section-title"><i class="fas fa-plus-circle"></i> New Fuel Entry</div>
+      <div class="row g-3">
+        <div class="col-md-3 col-sm-6">
+          <label class="form-label"><i class="fas fa-calendar me-1"></i>Date</label>
+          <input type="date" class="form-control" id="fuelDate">
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <label class="form-label"><i class="fas fa-truck me-1"></i>Vehicle</label>
+          <div class="vehicle-search-wrapper">
+            <i class="fas fa-search vsearch-icon"></i>
+            <input type="text" class="vsearch" id="vehicleSearch" placeholder="Search vehicle number..." autocomplete="off">
+            <div class="vdropdown" id="vehicleDropdown"></div>
+          </div>
+          <div id="vehicleSelected" style="display:none;" class="vselected">
+            <i class="fas fa-car" style="color:var(--accent);font-size:0.82rem;"></i>
+            <span class="plate" id="selectedVehicleText"></span>
+            <i class="fas fa-times ms-auto" style="color:var(--text3);cursor:pointer;" onclick="clearVehicle()"></i>
+          </div>
+          <input type="hidden" id="vehicleValue">
+        </div>
+        <div class="col-md-5 col-sm-6">
+          <label class="form-label"><i class="fas fa-gas-pump me-1"></i>Fuel Station</label>
+          <select class="form-select" id="fuelStation" onchange="handleStationChange()">
+            <option value="">-- Select Fuel Station --</option>
+            <option value="SVF Hosur">SVF Hosur</option>
+            <option value="BPCL Veer Nippani">BPCL Veer Nippani</option>
+            <option value="IOCL SVM Pondy">IOCL SVM Pondy</option>
+            <option value="HP IOCL OTP">HP IOCL OTP</option>
+            <option value="BPCL OTP">BPCL OTP</option>
+            <option value="Others">Others</option>
+          </select>
+          <div id="othersNameWrap" style="display:none;margin-top:8px;">
+            <input type="text" class="form-control" id="othersName" placeholder="✍️ Type station name here...">
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <label class="form-label"><i class="fas fa-tint me-1"></i>Fuel Litres (L)</label>
+          <input type="number" class="form-control" id="fuelLitres" placeholder="e.g. 45.5" step="0.01" min="0">
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <label class="form-label"><i class="fas fa-rupee-sign me-1"></i>Cost Per Litre (₹)</label>
+          <input type="number" class="form-control" id="costPerLitre" placeholder="e.g. 96.50" step="0.01" min="0">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label"><i class="fas fa-calculator me-1"></i>Total Amount (Auto Calculated)</label>
+          <div class="amount-display">
+            <div><div class="amt-label">Calculated Total</div><div class="amt-sub">Litres × Rate per Litre</div></div>
+            <div style="text-align:right;"><span class="amt-cur">₹</span><span class="amt-val" id="totalAmount">0.00</span></div>
+          </div>
+        </div>
+        <div class="col-12 d-flex gap-2 flex-wrap mt-2 align-items-center">
+          <button class="btn-primary-custom" onclick="addEntry()"><i class="fas fa-plus"></i> ADD ENTRY</button>
+          <button class="btn-outline-custom" onclick="clearForm()"><i class="fas fa-undo"></i> CLEAR</button>
+          <div class="ms-auto d-flex gap-2 flex-wrap">
+            <label class="btn-blue" style="cursor:pointer;border:none;padding:10px 18px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:1px;border-radius:var(--r2);">
+              <i class="fas fa-file-import"></i> IMPORT EXCEL
+              <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none;" onchange="importExcel(event)">
+            </label>
+            <button class="btn-green" onclick="downloadExcel()"><i class="fas fa-file-excel"></i> EXPORT EXCEL</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: RECORDS ===== -->
+  <div class="tab-pane-custom" id="tab-records">
+    <div class="table-wrap">
+      <div class="table-top">
+        <h3><i class="fas fa-list-alt me-2"></i>All Fuel Records</h3>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <input type="text" id="tableSearch" class="form-control" style="width:190px;padding:8px 12px!important;font-size:0.8rem!important;" placeholder="🔍 Filter records...">
+          <button class="btn-green" onclick="downloadExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+          <button class="btn-blue" onclick="downloadTableImage('recordsTable','Fuel_Records')"><i class="fas fa-image"></i> Save Image</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="recordsTable">
+          <thead>
+            <tr><th>S.No</th><th>Date</th><th>Vehicle</th><th>Fuel Station</th><th>Litres (L)</th><th>Rate (₹/L)</th><th>Total (₹)</th><th>Action</th></tr>
+          </thead>
+          <tbody id="recordsBody">
+            <tr><td colspan="8"><div class="empty-state"><div class="ei">⛽</div><p>No entries yet. Add your first fuel entry!</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: REPORT ===== -->
+  <div class="tab-pane-custom" id="tab-report">
+    <div class="report-filter-card">
+      <div class="section-title" style="color:var(--blue);"><i class="fas fa-filter"></i> Report Filter</div>
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3 col-sm-6">
+          <label class="form-label"><i class="fas fa-calendar me-1"></i>From Date</label>
+          <input type="date" class="form-control" id="rptFrom">
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <label class="form-label"><i class="fas fa-calendar me-1"></i>To Date</label>
+          <input type="date" class="form-control" id="rptTo">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label"><i class="fas fa-gas-pump me-1"></i>Filter by Station</label>
+          <div class="d-flex gap-2 flex-wrap" id="stationFilterBtns">
+            <button class="station-filter-btn all active" onclick="setStationFilter('ALL',this)">All</button>
+            <button class="station-filter-btn" onclick="setStationFilter('SVF Hosur',this)">SVF Hosur</button>
+            <button class="station-filter-btn" onclick="setStationFilter('BPCL Veer Nippani',this)">BPCL Veer Nippani</button>
+            <button class="station-filter-btn" onclick="setStationFilter('IOCL SVM Pondy',this)">IOCL SVM Pondy</button>
+            <button class="station-filter-btn" onclick="setStationFilter('HP IOCL OTP',this)">HP IOCL OTP</button>
+            <button class="station-filter-btn" onclick="setStationFilter('BPCL OTP',this)">BPCL OTP</button>
+            <button class="station-filter-btn" onclick="setStationFilter('Others',this)">Others</button>
+          </div>
+        </div>
+        <div class="col-12 d-flex gap-2 flex-wrap">
+          <button class="btn-primary-custom" onclick="generateReport()"><i class="fas fa-chart-bar"></i> GENERATE REPORT</button>
+          <button class="btn-outline-custom" onclick="clearReport()"><i class="fas fa-times"></i> CLEAR</button>
+          <div class="ms-auto d-flex gap-2 flex-wrap">
+            <button class="btn-green" onclick="downloadReportExcel()"><i class="fas fa-file-excel"></i> Export Report Excel</button>
+            <button class="btn-blue" onclick="downloadTableImage('reportTable','Fuel_Report')"><i class="fas fa-image"></i> Save Image</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="report-summary" id="reportSummary" style="display:none;"></div>
+    <div class="table-wrap" id="reportTableWrap" style="display:none;">
+      <div class="table-top">
+        <h3 id="reportTitle"><i class="fas fa-chart-bar me-2"></i>Report Results</h3>
+        <span id="reportRangeLabel" style="font-size:0.8rem;color:var(--text2);font-weight:700;"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="reportTable">
+          <thead>
+            <tr><th>S.No</th><th>Date</th><th>Vehicle</th><th>Fuel Station</th><th>Litres (L)</th><th>Rate (₹/L)</th><th>Total (₹)</th></tr>
+          </thead>
+          <tbody id="reportBody"></tbody>
+          <tfoot id="reportFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: VEHICLES ===== -->
+  <div class="tab-pane-custom" id="tab-vehicles">
+    <div class="card-box">
+      <div class="section-title"><i class="fas fa-car-side"></i> Vehicle Management</div>
+      <div class="row g-3 align-items-end mb-4">
+        <div class="col-md-5">
+          <label class="form-label">New Vehicle Number</label>
+          <input type="text" class="form-control" id="newVehicleInput" placeholder="e.g. TN 52 AA 1234" style="text-transform:uppercase;">
+        </div>
+        <div class="col-md-3">
+          <button class="btn-primary-custom" onclick="saveNewVehicle()"><i class="fas fa-plus"></i> ADD VEHICLE</button>
+        </div>
+      </div>
+      <label class="form-label mb-2"><i class="fas fa-list me-1"></i>All Vehicles (<span id="vcount">0</span>)</label>
+      <input type="text" class="form-control mb-3" id="vlistSearch" placeholder="🔍 Search vehicles..." style="max-width:300px;">
+      <div id="vehicleList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:10px;max-height:450px;overflow-y:auto;padding-right:4px;"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- FOOTER -->
+<div class="app-footer">
+  <div class="footer-text">
+    <span class="footer-brand">⛽ MMRoadways Fuel Entry</span>
+    &nbsp;|&nbsp;
+    Fleet Fuel Management System
+    &nbsp;|&nbsp;
+    Generated by <span class="footer-name">✦ Vignesh</span>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<div id="captureArea"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+// ==================== DATA ====================
+const defaultVehicles=[
+  "KA 01 AK 2266","KA 01 AK 2288","KA 01 AL 1266","KA 01 AL 1288",
+  "KA 51 B 8499","KA 51 B 8677","KA 51 B 8688",
+  "TN 52 AA 0033","TN 52 AA 0077","TN 52 AA 0099","TN 52 AA 0333","TN 52 AA 0666",
+  "TN 52 AA 2355","TN 52 AA 2799","TN 52 AA 3155","TN 52 AA 3177","TN 52 AA 3299",
+  "TN 52 AA 3488","TN 52 AA 4866","TN 52 AA 5144","TN 52 AA 6233","TN 52 AA 6255",
+  "TN 52 AA 6566","TN 52 AA 6755","TN 52 AA 7988","TN 52 AA 8177","TN 52 AA 8199",
+  "TN 52 AA 8388","TN 52 AA 9822",
+  "TN 52 AB 0011","TN 52 AB 0044","TN 52 AB 3344","TN 52 AB 3455","TN 52 AB 3566",
+  "TN 52 AB 3577","TN 52 AB 3599","TN 52 AB 3933","TN 52 AB 4004","TN 52 AB 5000",
+  "TN 52 AB 6166","TN 52 AB 6299","TN 52 AB 6611","TN 52 AB 7007","TN 52 AB 7133",
+  "TN 52 AB 7199","TN 52 AB 7244","TN 52 AB 8000",
+  "TN 52 AC 4233","TN 52 AC 4255","TN 52 AC 4288","TN 52 AC 4611","TN 52 AC 4633",
+  "TN 52 AC 7333","TN 52 AC 7366","TN 52 AC 7455","TN 52 AC 7555","TN 52 AC 7855","TN 52 AC 8166",
+  "TN 52 AD 3944","TN 52 AD 4088","TN 52 AD 4133","TN 52 AD 4355","TN 52 AD 4755",
+  "TN 52 AD 4988","TN 52 AD 9488","TN 52 AD 9866",
+  "TN 52 AE 1244","TN 52 AE 1388","TN 52 AE 1544","TN 52 AE 3533","TN 52 AE 3866",
+  "TN 52 AE 4244","TN 52 AE 4699","TN 52 AE 4955","TN 52 AE 8155","TN 52 AE 8399",
+  "TN 52 AE 8555","TN 52 AE 8699","TN 52 AE 8744","TN 52 AE 9677",
+  "TN 52 AF 1699","TN 52 AF 1766","TN 52 AF 2399","TN 52 AF 3677",
+  "TN 52 F 8781","TN 52 F 8942","TN 52 F 9127",
+  "TN 52 H 7166","TN 52 H 7355",
+  "TN 52 J 1633","TN 52 J 1848","TN 52 J 2767","TN 52 J 3210","TN 52 J 3364",
+  "TN 52 J 6890","TN 52 J 7270","TN 52 J 7870","TN 52 J 7909","TN 52 J 7911",
+  "TN 52 J 9280","TN 52 J 9281","TN 52 J 9283","TN 52 J 9788","TN 52 J 9805","TN 52 J 9844",
+  "TN 52 L 5866","TN 52 L 5941","TN 52 L 6124","TN 52 L 6140","TN 52 L 6349",
+  "TN 52 L 6925","TN 52 L 6964","TN 52 L 7004","TN 52 L 7024",
+  "TN 52 P 4630","TN 52 P 4654",
+  "TN 52 R 3255","TN 52 R 5688","TN 52 R 6288","TN 52 R 6355","TN 52 R 6377",
+  "TN 52 R 6588","TN 52 R 9266","TN 52 R 9366","TN 52 R 9766","TN 52 R 9855","TN 52 R 9959",
+  "TN 91 Y 6345"
+];
+
+const stationClassMap={"SVF Hosur":"sb-0","BPCL Veer Nippani":"sb-1","IOCL SVM Pondy":"sb-2","HP IOCL OTP":"sb-3","BPCL OTP":"sb-4","Others":"sb-5"};
+const stColorMap={
+  "SVF Hosur":{h:"8B0000",r1:"FFE8E8",r2:"FFF5F5"},
+  "BPCL Veer Nippani":{h:"003366",r1:"E0EEFF",r2:"EFF5FF"},
+  "IOCL SVM Pondy":{h:"006400",r1:"E0FFE0",r2:"F0FFF0"},
+  "HP IOCL OTP":{h:"4B0082",r1:"F0E0FF",r2:"F8F0FF"},
+  "BPCL OTP":{h:"8B4500",r1:"FFF0E0",r2:"FFF8F0"},
+  "Others":{h:"555555",r1:"F0F0F0",r2:"F8F8F8"}
+};
+
+let vehicles=[...defaultVehicles];
+let entries=[];
+let sno=1;
+let filteredVehicles=[];
+let highlightIdx=-1;
+let activeStationFilter='ALL';
+let reportData=[];
+
+// ==================== LOCAL STORAGE ====================
+function saveData(){
+  try{
+    localStorage.setItem('mmr_entries',JSON.stringify(entries));
+    localStorage.setItem('mmr_sno',String(sno));
+    localStorage.setItem('mmr_vehicles',JSON.stringify(vehicles));
+  }catch(e){console.warn('Save failed',e);}
+}
+
+function loadData(){
+  try{
+    const se=localStorage.getItem('mmr_entries');
+    const ss=localStorage.getItem('mmr_sno');
+    const sv=localStorage.getItem('mmr_vehicles');
+    if(se){entries=JSON.parse(se);}
+    if(ss){sno=parseInt(ss)||1;}
+    if(sv){const vp=JSON.parse(sv);if(vp&&vp.length)vehicles=vp;}
+  }catch(e){console.warn('Load failed',e);}
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded',()=>{
+  loadData();
+  document.getElementById('fuelDate').value=today();
+  document.getElementById('rptFrom').value=today();
+  document.getElementById('rptTo').value=today();
+  document.getElementById('fuelLitres').addEventListener('input',calcTotal);
+  document.getElementById('costPerLitre').addEventListener('input',calcTotal);
+  document.getElementById('tableSearch').addEventListener('input',renderRecords);
+  document.getElementById('vlistSearch').addEventListener('input',renderVehicleList);
+  document.getElementById('newVehicleInput').addEventListener('input',function(){this.value=this.value.toUpperCase();});
+  const vs=document.getElementById('vehicleSearch');
+  vs.addEventListener('input',handleVSearch);
+  vs.addEventListener('focus',handleVSearch);
+  vs.addEventListener('keydown',handleVKeydown);
+  document.addEventListener('click',e=>{if(!e.target.closest('.vehicle-search-wrapper'))closeVDropdown();});
+  renderVehicleList();
+  updateStats();
+});
+
+function today(){return new Date().toISOString().split('T')[0];}
+function fmtDate(d){if(!d)return'';const[y,m,day]=d.split('-');const ms=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${day} ${ms[+m-1]} ${y}`;}
+function getStClass(s){return stationClassMap[s]||'sb-custom';}
+function getStColor(s){return stColorMap[s]||stColorMap["Others"];}
+
+// ==================== TABS ====================
+function showTab(t,btn){
+  document.querySelectorAll('.tab-pane-custom').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  btn.classList.add('active');
+  if(t==='records')renderRecords();
+  if(t==='vehicles')renderVehicleList();
+}
+
+// ==================== VEHICLE SEARCH ====================
+function handleVSearch(){
+  const q=document.getElementById('vehicleSearch').value.trim().toUpperCase().replace(/\s+/g,' ');
+  filteredVehicles=q?vehicles.filter(v=>v.replace(/\s+/g,'').includes(q.replace(/\s+/g,''))||v.includes(q)):[...vehicles];
+  highlightIdx=-1;
+  const dd=document.getElementById('vehicleDropdown');
+  if(!filteredVehicles.length){
+    dd.innerHTML=`<div class="voption" style="color:var(--text3);cursor:default;"><i class="fas fa-info-circle me-2"></i>No vehicles found</div>`;
+  } else {
+    dd.innerHTML=filteredVehicles.slice(0,60).map((v,i)=>`<div class="voption" data-idx="${i}" onclick="selectVehicle('${v}')"><span class="plate-badge">${v}</span></div>`).join('');
+  }
+  dd.classList.add('show');
+}
+
+function handleVKeydown(e){
+  const dd=document.getElementById('vehicleDropdown');
+  const items=dd.querySelectorAll('.voption[data-idx]');
+  if(!items.length)return;
+  if(e.key==='ArrowDown'){e.preventDefault();highlightIdx=Math.min(highlightIdx+1,items.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();highlightIdx=Math.max(highlightIdx-1,0);}
+  else if(e.key==='Enter'&&highlightIdx>=0){e.preventDefault();selectVehicle(filteredVehicles[highlightIdx]);return;}
+  else if(e.key==='Escape'){closeVDropdown();return;}
+  items.forEach((el,i)=>{el.classList.toggle('vactive',i===highlightIdx);if(i===highlightIdx)el.scrollIntoView({block:'nearest'});});
+}
+
+function selectVehicle(v){
+  document.getElementById('vehicleValue').value=v;
+  document.getElementById('selectedVehicleText').textContent=v;
+  document.getElementById('vehicleSelected').style.display='flex';
+  document.getElementById('vehicleSearch').style.display='none';
+  closeVDropdown();
+}
+
+function clearVehicle(){
+  document.getElementById('vehicleValue').value='';
+  document.getElementById('vehicleSearch').value='';
+  document.getElementById('vehicleSearch').style.display='';
+  document.getElementById('vehicleSelected').style.display='none';
+}
+
+function closeVDropdown(){document.getElementById('vehicleDropdown').classList.remove('show');}
+
+// ==================== STATION OTHERS ====================
+function handleStationChange(){
+  const v=document.getElementById('fuelStation').value;
+  document.getElementById('othersNameWrap').style.display=v==='Others'?'block':'none';
+  if(v!=='Others')document.getElementById('othersName').value='';
+}
+
+function getStationName(){
+  const v=document.getElementById('fuelStation').value;
+  if(v==='Others'){
+    const n=document.getElementById('othersName').value.trim();
+    return n?n:'Others';
+  }
+  return v;
+}
+
+// ==================== CALC TOTAL ====================
+function calcTotal(){
+  const l=parseFloat(document.getElementById('fuelLitres').value)||0;
+  const r=parseFloat(document.getElementById('costPerLitre').value)||0;
+  document.getElementById('totalAmount').textContent=(l*r).toFixed(2);
+}
+
+// ==================== ADD ENTRY ====================
+function addEntry(){
+  const date=document.getElementById('fuelDate').value;
+  const vehicle=document.getElementById('vehicleValue').value;
+  const station=getStationName();
+  const litres=parseFloat(document.getElementById('fuelLitres').value);
+  const rate=parseFloat(document.getElementById('costPerLitre').value);
+  if(!date){showToast('Please select a date',true);return;}
+  if(!vehicle){showToast('Please select a vehicle',true);return;}
+  if(!station){showToast('Please select a fuel station',true);return;}
+  if(!litres||litres<=0){showToast('Please enter valid fuel litres',true);return;}
+  if(!rate||rate<=0){showToast('Please enter valid cost per litre',true);return;}
+  const total=(litres*rate).toFixed(2);
+  entries.push({sno:sno++,date,vehicle,station,litres,rate,total});
+  showToast(`Entry added! ₹${total} for ${vehicle}`);
+  clearForm();
+  updateStats();
+  saveData();
+}
+
+function clearForm(){
+  clearVehicle();
+  document.getElementById('fuelStation').value='';
+  document.getElementById('othersName').value='';
+  document.getElementById('othersNameWrap').style.display='none';
+  document.getElementById('fuelLitres').value='';
+  document.getElementById('costPerLitre').value='';
+  document.getElementById('totalAmount').textContent='0.00';
+}
+
+function deleteEntry(i){entries.splice(i,1);renderRecords();updateStats();saveData();showToast('Entry deleted');}
+
+// ==================== STATS ====================
+function updateStats(){
+  document.getElementById('stat-entries').textContent=entries.length;
+  document.getElementById('stat-amount').textContent=entries.reduce((s,e)=>s+parseFloat(e.total),0).toLocaleString('en-IN',{maximumFractionDigits:2});
+  document.getElementById('stat-litres').textContent=entries.reduce((s,e)=>s+parseFloat(e.litres),0).toFixed(1);
+  document.getElementById('stat-stations').textContent=new Set(entries.map(e=>e.station)).size;
+  document.getElementById('recordCount').textContent=`${entries.length} Record${entries.length!==1?'s':''}`;
+}
+
+// ==================== RENDER RECORDS ====================
+function renderRecords(){
+  const q=document.getElementById('tableSearch').value.trim().toLowerCase();
+  let filtered=entries.filter(e=>!q||e.vehicle.toLowerCase().includes(q)||e.station.toLowerCase().includes(q)||e.date.includes(q)||e.total.includes(q));
+  const tbody=document.getElementById('recordsBody');
+  if(!filtered.length){
+    tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><div class="ei">⛽</div><p>${entries.length===0?'No entries yet. Add your first fuel entry!':'No records match your search.'}</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=filtered.map(e=>{
+    const origIdx=entries.indexOf(e);
+    return`<tr>
+      <td><span class="sno-badge">#${e.sno}</span></td>
+      <td>${fmtDate(e.date)}</td>
+      <td><span class="plate-cell">${e.vehicle}</span></td>
+      <td><span class="station-badge ${getStClass(e.station)}">${e.station}</span></td>
+      <td>${e.litres} L</td><td>₹${e.rate}</td>
+      <td><span class="amount-cell">₹${e.total}</span></td>
+      <td><button class="btn-sm-del" onclick="deleteEntry(${origIdx})"><i class="fas fa-trash"></i></button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ==================== VEHICLE LIST ====================
+function renderVehicleList(){
+  const q=document.getElementById('vlistSearch').value.trim().toUpperCase();
+  const filtered=q?vehicles.filter(v=>v.includes(q)):vehicles;
+  document.getElementById('vcount').textContent=vehicles.length;
+  document.getElementById('vehicleList').innerHTML=filtered.map(v=>`
+    <div class="vcard">
+      <span class="plate-cell" style="font-size:0.84rem;">${v}</span>
+      <button class="btn-sm-del" onclick="removeVehicle('${v}')" style="font-size:0.7rem;padding:3px 8px;"><i class="fas fa-times"></i></button>
+    </div>`).join('');
+}
+
+function saveNewVehicle(){
+  const val=document.getElementById('newVehicleInput').value.trim().toUpperCase();
+  if(!val){showToast('Please enter vehicle number',true);return;}
+  if(vehicles.includes(val)){showToast('Vehicle already exists!',true);return;}
+  vehicles.push(val);vehicles.sort();
+  document.getElementById('newVehicleInput').value='';
+  renderVehicleList();saveData();showToast(`Vehicle ${val} added!`);
+}
+
+function removeVehicle(v){
+  const i=vehicles.indexOf(v);
+  if(i>-1){vehicles.splice(i,1);renderVehicleList();saveData();showToast('Vehicle removed');}
+}
+
+// ==================== REPORT ====================
+function setStationFilter(s,btn){
+  activeStationFilter=s;
+  document.querySelectorAll('.station-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function generateReport(){
+  const from=document.getElementById('rptFrom').value;
+  const to=document.getElementById('rptTo').value;
+  if(!from||!to){showToast('Please select date range',true);return;}
+  if(from>to){showToast('From date must be before To date',true);return;}
+  let filtered=entries.filter(e=>e.date>=from&&e.date<=to);
+  if(activeStationFilter!=='ALL')filtered=filtered.filter(e=>e.station===activeStationFilter);
+  reportData=filtered;
+  const summaryEl=document.getElementById('reportSummary');
+  const tableWrap=document.getElementById('reportTableWrap');
+  if(!filtered.length){summaryEl.innerHTML='';summaryEl.style.display='none';tableWrap.style.display='none';showToast('No records found for selected filter',true);return;}
+  const totalAmt=filtered.reduce((s,e)=>s+parseFloat(e.total),0);
+  const totalL=filtered.reduce((s,e)=>s+parseFloat(e.litres),0);
+  const avgRate=totalL>0?(totalAmt/totalL):0;
+  summaryEl.style.display='grid';
+  summaryEl.innerHTML=`
+    <div class="rs-card"><div class="rs-label">Total Entries</div><div class="rs-value" style="color:var(--accent);">${filtered.length}</div></div>
+    <div class="rs-card"><div class="rs-label">Total Amount</div><div class="rs-value" style="color:var(--green);">₹${totalAmt.toLocaleString('en-IN',{maximumFractionDigits:2})}</div></div>
+    <div class="rs-card"><div class="rs-label">Total Litres</div><div class="rs-value" style="color:var(--blue);">${totalL.toFixed(2)} L</div></div>
+    <div class="rs-card"><div class="rs-label">Avg Rate</div><div class="rs-value" style="color:var(--purple);">₹${avgRate.toFixed(2)}/L</div></div>
+    <div class="rs-card"><div class="rs-label">Stations</div><div class="rs-value" style="color:var(--accent);">${new Set(filtered.map(e=>e.station)).size}</div></div>`;
+  tableWrap.style.display='block';
+  document.getElementById('reportTitle').innerHTML=`<i class="fas fa-chart-bar me-2"></i>Report: ${activeStationFilter==='ALL'?'All Stations':activeStationFilter}`;
+  document.getElementById('reportRangeLabel').textContent=`${fmtDate(from)} → ${fmtDate(to)}`;
+  document.getElementById('reportBody').innerHTML=filtered.map((e,i)=>`<tr>
+    <td><span class="sno-badge">#${i+1}</span></td>
+    <td>${fmtDate(e.date)}</td>
+    <td><span class="plate-cell">${e.vehicle}</span></td>
+    <td><span class="station-badge ${getStClass(e.station)}">${e.station}</span></td>
+    <td>${e.litres} L</td><td>₹${e.rate}</td>
+    <td><span class="amount-cell">₹${e.total}</span></td>
+  </tr>`).join('');
+  document.getElementById('reportFoot').innerHTML=`
+    <tr style="background:#fff8f0;border-top:2px solid var(--accent);">
+      <td colspan="4" style="text-align:right;color:var(--accent);font-family:'Rajdhani',sans-serif;letter-spacing:1px;font-weight:700;">TOTAL</td>
+      <td style="color:var(--green);font-family:'Rajdhani',sans-serif;font-weight:700;">${totalL.toFixed(2)} L</td>
+      <td style="color:var(--text3);">—</td>
+      <td style="color:var(--green);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.05rem;">₹${totalAmt.toLocaleString('en-IN',{maximumFractionDigits:2})}</td>
+    </tr>`;
+}
+
+function clearReport(){
+  document.getElementById('rptFrom').value=today();
+  document.getElementById('rptTo').value=today();
+  document.getElementById('reportSummary').style.display='none';
+  document.getElementById('reportTableWrap').style.display='none';
+  activeStationFilter='ALL';reportData=[];
+  document.querySelectorAll('.station-filter-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.station-filter-btn.all').classList.add('active');
+}
+
+// ==================== IMPORT ====================
+function importExcel(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=new Uint8Array(e.target.result);
+      const wb=XLSX.read(data,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      let imported=0;
+      for(let i=1;i<rows.length;i++){
+        const row=rows[i];
+        if(!row||row.length<6)continue;
+        const dateVal=row[1],vehicle=String(row[2]||'').trim(),station=String(row[3]||'').trim();
+        const litres=parseFloat(row[4]),rate=parseFloat(row[5]),totalRaw=parseFloat(row[6]);
+        if(!vehicle||!station||isNaN(litres)||isNaN(rate))continue;
+        let date='';
+        if(typeof dateVal==='number'){
+          // Excel serial date
+          const d=new Date(Math.round((dateVal-25569)*86400*1000));
+          date=d.toISOString().split('T')[0];
+        } else if(typeof dateVal==='string'&&dateVal.match(/\d{4}-\d{2}-\d{2}/)){
+          date=dateVal.match(/\d{4}-\d{2}-\d{2}/)[0];
+        } else if(typeof dateVal==='string'&&dateVal.trim()){
+          date=today();
+        } else {date=today();}
+        const total=isNaN(totalRaw)?(litres*rate).toFixed(2):totalRaw.toFixed(2);
+        entries.push({sno:sno++,date,vehicle,station,litres,rate,total});
+        imported++;
+      }
+      if(imported>0){updateStats();saveData();showToast(`✅ ${imported} entries imported successfully!`);}
+      else showToast('No valid entries found in file',true);
+    }catch(err){showToast('Error reading file. Check format.',true);console.error(err);}
+    event.target.value='';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ==================== EXCEL EXPORT ====================
+function hStyle(hex){return{fill:{fgColor:{rgb:hex}},font:{bold:true,color:{rgb:'FFFFFF'},name:'Calibri',sz:11},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:{top:{style:'thin',color:{rgb:'CCCCCC'}},bottom:{style:'thin',color:{rgb:'CCCCCC'}},left:{style:'thin',color:{rgb:'CCCCCC'}},right:{style:'thin',color:{rgb:'CCCCCC'}}}};}
+function dStyle(hex,bold){return{fill:{fgColor:{rgb:hex}},font:{name:'Calibri',sz:10,bold:!!bold,color:{rgb:'222222'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'thin',color:{rgb:'DDDDDD'}},bottom:{style:'thin',color:{rgb:'DDDDDD'}},left:{style:'thin',color:{rgb:'DDDDDD'}},right:{style:'thin',color:{rgb:'DDDDDD'}}}};}
+
+function buildExcel(data){
+  const wb=XLSX.utils.book_new();
+  const cols7=['A','B','C','D','E','F','G'];
+  const cols6=['A','B','C','D','E','F'];
+
+  // MAIN SHEET
+  const mainRows=[["S.No","Date","Vehicle Number","Fuel Station","Litres (L)","Rate (₹/L)","Total (₹)"]];
+  data.forEach((e,i)=>mainRows.push([i+1,e.date,e.vehicle,e.station,parseFloat(e.litres),parseFloat(e.rate),parseFloat(e.total)]));
+  mainRows.push([]);
+  const mL=data.reduce((s,e)=>s+parseFloat(e.litres),0);
+  const mA=data.reduce((s,e)=>s+parseFloat(e.total),0);
+  mainRows.push(['','','','TOTAL',parseFloat(mL.toFixed(2)),'',parseFloat(mA.toFixed(2))]);
+  const wsMain=XLSX.utils.aoa_to_sheet(mainRows);
+  wsMain['!cols']=[{wch:8},{wch:14},{wch:22},{wch:22},{wch:13},{wch:13},{wch:16}];
+  mainRows.forEach((row,ri)=>{
+    cols7.forEach((col,ci)=>{
+      const addr=col+(ri+1);if(!wsMain[addr])return;
+      if(ri===0)wsMain[addr].s=hStyle('1A3A5C');
+      else if(ri===mainRows.length-1)wsMain[addr].s=hStyle('145A32');
+      else if(row.length>1){const sc=getStColor(row[3]);wsMain[addr].s=dStyle(ri%2===0?sc.r1:sc.r2,ci===6);}
+    });
+  });
+  XLSX.utils.book_append_sheet(wb,wsMain,'All Entries');
+
+  // PER STATION SHEETS
+  const groups={};
+  data.forEach(e=>{if(!groups[e.station])groups[e.station]=[];groups[e.station].push(e);});
+  Object.entries(groups).forEach(([st,sE])=>{
+    const sc=getStColor(st);
+    const sr=[[`⛽ FUEL STATION: ${st}`],[],["S.No","Date","Vehicle Number","Litres (L)","Rate (₹/L)","Total (₹)"]];
+    sE.forEach((e,i)=>sr.push([i+1,e.date,e.vehicle,parseFloat(e.litres),parseFloat(e.rate),parseFloat(e.total)]));
+    sr.push([]);
+    const sL=sE.reduce((s,e)=>s+parseFloat(e.litres),0);
+    const sA=sE.reduce((s,e)=>s+parseFloat(e.total),0);
+    sr.push(['','TOTAL','',parseFloat(sL.toFixed(2)),'',parseFloat(sA.toFixed(2))]);
+    const ws=XLSX.utils.aoa_to_sheet(sr);
+    ws['!cols']=[{wch:8},{wch:14},{wch:24},{wch:13},{wch:13},{wch:16}];
+    ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:5}}];
+    sr.forEach((row,ri)=>{
+      cols6.forEach((col,ci)=>{
+        const addr=col+(ri+1);if(!ws[addr])return;
+        if(ri===0)ws[addr].s={fill:{fgColor:{rgb:sc.h}},font:{bold:true,color:{rgb:'FFFFFF'},sz:13,name:'Calibri'},alignment:{horizontal:'center',vertical:'center'}};
+        else if(ri===2)ws[addr].s=hStyle(sc.h);
+        else if(ri===sr.length-1)ws[addr].s=hStyle('145A32');
+        else if(row.length>1)ws[addr].s=dStyle(ri%2===0?sc.r1:sc.r2,ci===5);
+      });
+    });
+    XLSX.utils.book_append_sheet(wb,ws,st.substring(0,31));
+  });
+  return wb;
+}
+
+function downloadExcel(){
+  if(!entries.length){showToast('No entries to export!',true);return;}
+  const wb=buildExcel(entries);
+  XLSX.writeFile(wb,`Fuel_Report_${today()}.xlsx`,{cellStyles:true});
+  showToast('Excel downloaded!');
+}
+
+function downloadReportExcel(){
+  if(!reportData.length){showToast('Please generate report first',true);return;}
+  const from=document.getElementById('rptFrom').value;
+  const to=document.getElementById('rptTo').value;
+  const wb=buildExcel(reportData);
+  const label=(activeStationFilter==='ALL'?'All':activeStationFilter).replace(/\s+/g,'_');
+  XLSX.writeFile(wb,`Fuel_Report_${label}_${from}_to_${to}.xlsx`,{cellStyles:true});
+  showToast('Report Excel downloaded!');
+}
+
+// ==================== IMAGE DOWNLOAD ====================
+async function downloadTableImage(tableId,filename){
+  const table=document.getElementById(tableId);
+  if(!table){showToast('Table not found',true);return;}
+
+  const wrapper=document.createElement('div');
+  wrapper.style.cssText='background:#fff;padding:28px;font-family:Arial,sans-serif;min-width:900px;';
+
+  // Header banner
+  const hdr=document.createElement('div');
+  hdr.style.cssText='background:linear-gradient(135deg,#fff3e0,#fde8c0);border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;border:2px solid #e67e22;';
+  hdr.innerHTML=`
+    <div style="width:44px;height:44px;background:linear-gradient(135deg,#e67e22,#cf6d17);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;">⛽</div>
+    <div>
+      <div style="font-size:1.4rem;font-weight:700;color:#e67e22;letter-spacing:1.5px;">MMRoadways Fuel Entry</div>
+      <div style="font-size:0.72rem;color:#95a5a6;letter-spacing:2px;text-transform:uppercase;">Generated: ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div>
+    </div>`;
+  wrapper.appendChild(hdr);
+
+  const tClone=table.cloneNode(true);
+  tClone.style.cssText='width:100%;border-collapse:collapse;';
+
+  // Remove action column
+  const ths=tClone.querySelectorAll('th');
+  let acIdx=-1;
+  ths.forEach((th,i)=>{if(th.textContent.trim()==='Action')acIdx=i;});
+  if(acIdx>=0)tClone.querySelectorAll('tr').forEach(tr=>{if(tr.cells[acIdx])tr.deleteCell(acIdx);});
+
+  tClone.querySelectorAll('th').forEach(th=>{th.style.cssText='background:#fff3e0;color:#cf6d17;padding:12px 13px;font-size:0.74rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;border-bottom:2px solid #f0a500;text-align:left;';});
+  tClone.querySelectorAll('tbody tr').forEach((tr,i)=>{
+    tr.style.background=i%2===0?'#ffffff':'#fffdf8';
+    tr.querySelectorAll('td').forEach(td=>{td.style.cssText='padding:10px 13px;font-size:0.84rem;color:#2c3e50;border-bottom:1px solid #f0f0f0;';});
+  });
+  tClone.querySelectorAll('tfoot tr').forEach(tr=>{
+    tr.style.background='#fff8f0';
+    tr.querySelectorAll('td').forEach(td=>{td.style.cssText='padding:12px 13px;font-weight:700;border-top:2px solid #e67e22;font-size:0.9rem;color:#2c3e50;';});
+  });
+  wrapper.appendChild(tClone);
+
+  const ftr=document.createElement('div');
+  ftr.style.cssText='text-align:center;margin-top:16px;font-size:0.7rem;color:#95a5a6;letter-spacing:1px;';
+  ftr.textContent='MMRoadways Fuel Entry — Generated by Vignesh';
+  wrapper.appendChild(ftr);
+
+  const ca=document.getElementById('captureArea');
+  ca.style.cssText='position:fixed;top:0;left:0;opacity:0;pointer-events:none;z-index:-999;width:1200px;';
+  ca.innerHTML='';ca.appendChild(wrapper);
+
+  showToast('Preparing image...');
+  await new Promise(r=>setTimeout(r,300));
+
+  html2canvas(wrapper,{scale:2,useCORS:true,backgroundColor:'#ffffff',width:wrapper.scrollWidth,height:wrapper.scrollHeight})
+    .then(canvas=>{
+      const link=document.createElement('a');
+      link.download=`${filename}_${today()}.png`;
+      link.href=canvas.toDataURL('image/png');
+      link.click();
+      ca.innerHTML='';
+      showToast('Image saved successfully!');
+    })
+    .catch(err=>{console.error(err);showToast('Image capture failed',true);ca.innerHTML='';});
+}
+
+// ==================== TOAST ====================
+function showToast(msg,isErr=false){
+  const c=document.getElementById('toastContainer');
+  const d=document.createElement('div');
+  d.className=`toast-msg${isErr?' err':''}`;
+  d.innerHTML=`<i class="fas fa-${isErr?'exclamation-circle':'check-circle'}" style="color:${isErr?'#c0392b':'#16a085'};font-size:1rem;"></i> ${msg}`;
+  c.appendChild(d);
+  setTimeout(()=>d.remove(),2800);
+}
+</script>
+</body>
+</html>
